@@ -66,7 +66,42 @@ const AddProductModal = () => {
     productPriceInWei,
   ]);
 
+  // Define function that handles the creation of a product through the marketplace contract
+  const handleCreateProduct = async () => {
+    if (!createProduct) {
+      throw "Failed to create product";
+    }
+    setLoading("Creating...");
+    if (!isComplete) throw new Error("Please fill all fields");
+    // Create the product by calling the writeProduct function on the marketplace contract
+    const purchaseTx = await createProduct();
+    setLoading("Waiting for confirmation...");
+    // Wait for the transaction to be mined
+    await purchaseTx.wait();
+    // Close the modal and clear the input fields after the product is added to the marketplace
+    setVisible(false);
+    clearForm();
+  };
 
+  // Define function that handles the creation of a product, if a user submits the product form
+  const addProduct = async (e: any) => {
+    e.preventDefault();
+    try {
+      // Display a notification while the product is being added to the marketplace
+      await toast.promise(handleCreateProduct(), {
+        pending: "Creating product...",
+        success: "Product created successfully",
+        error: "Something went wrong. Try again.",
+      });
+      // Display an error message if something goes wrong
+    } catch (e: any) {
+      console.log({ e });
+      toast.error(e?.message || "Something went wrong. Try again.");
+      // Clear the loading state after the product is added to the marketplace
+    } finally {
+      setLoading("");
+    }
+  };
 
   // Get the user's address and balance
   const { address, isConnected } = useAccount();
