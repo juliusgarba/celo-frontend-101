@@ -105,11 +105,11 @@ const CommentModal = ({id, name}:any) => {
                   aria-labelledby="modal-headline"
                 >
                   {/* Modal view */}
-                <p className="text-2xl text-center m-4">Comments on "{name}"</p>
+                <p className="text-2xl text-center m-4">Comments on &quot;{name}&quot;</p>
                 <div className="flex flex-col gap-4 m-4">
                   {/* List of all comments */}
-                  {comments?.map((comment: { commenter: string; timeStamp: string; comment: string }) => (
-                      <div className="border rounded-lg flex gap-3 px-4 py-2">
+                  {comments?.map((comment: { commenter: string; timeStamp: string; comment: string }, index: any) => (
+                      <div key={index} className="border rounded-lg flex gap-3 px-4 py-2">
                         <Link href={`https://alfajores.celoscan.io/address/${comment.commenter}`}>{identiconTemplate(comment.commenter)}</Link>
                           <div className="flex flex-col">
                               <div className="italic underline text-sm font-mono">{new Date(Number(comment.timeStamp.toString())*1000).toLocaleString()}</div>
