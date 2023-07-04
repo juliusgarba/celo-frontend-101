@@ -61,10 +61,22 @@ contract Marketplace {
         uint256 price;
         // Number of times the product has been sold
         uint256 sold;
+        // Number of times product has been liked
+        uint256 likes;
+    }
+
+    struct Comment {
+        address payable commenter;
+        string comment;
+        uint256 timeStamp;
     }
 
     // Mapping of products to their index
     mapping(uint256 => Product) internal products;
+    // Mapping of all comments
+    mapping(uint256 => Comment[]) internal comments;
+    // Mapping of all liked products
+    mapping(uint256 => mapping(address => bool)) liked;
 
     // Writes a new product to the marketplace
     function writeProduct(
@@ -76,6 +88,8 @@ contract Marketplace {
     ) public {
         // Number of times the product has been sold is initially 0 because it has not been sold yet
         uint256 _sold = 0;
+        // Number of times the product has been liked. 0 by default.
+        uint256 _likes = 0;
         // Adds a new Product struct to the products mapping
         products[productsLength] = Product(
             // Sender's address is set as the owner
@@ -85,7 +99,8 @@ contract Marketplace {
             _description,
             _location,
             _price,
-            _sold
+            _sold,
+            _likes
         );
         // Increases the number of products in the marketplace by 1
         productsLength++;
@@ -99,26 +114,12 @@ contract Marketplace {
         public
         view
         returns (
-            // Address of the product owner, payable because the owner can receive tokens
-            address payable,
-            string memory,
-            string memory,
-            string memory,
-            string memory,
-            uint256,
-            uint256
+            Product memory
         )
     {
         // Returns the details of the product
-        return (
-            products[_index].owner,
-            products[_index].name,
-            products[_index].image,
-            products[_index].description,
-            products[_index].location,
-            products[_index].price,
-            products[_index].sold
-        );
+        Product memory product = products[_index];
+        return product;
     }
 
     // Buys a product from the marketplace
@@ -146,5 +147,36 @@ contract Marketplace {
     // Returns the number of products in the marketplace
     function getProductsLength() public view returns (uint256) {
         return (productsLength);
+    }
+
+    // Like a product
+    function like(uint256 _index) public {
+        require(liked[_index][msg.sender] == false, "Already liked product");
+        liked[_index][msg.sender] = true;
+        products[_index].likes++;
+    } 
+
+    // unlike a product
+    function unlike(uint256 _index) public {
+        require(liked[_index][msg.sender] == true, "First like product before unlike");
+        liked[_index][msg.sender] = false;
+        products[_index].likes--;
+    }
+
+    // Make a comment on a product
+    function makeComment(uint256 _index, string memory _comment) public {
+        require(_index < productsLength, "Invalid index");
+        require(msg.sender != address(0), "Invalid sender");
+        comments[_index].push(Comment(payable(msg.sender), _comment, block.timestamp));
+    }
+
+    // Get comments made on a product
+    function getComments(uint256 _index) public view returns (Comment[] memory) {
+        return comments[_index];
+    }
+
+    // Return true if caller has liked a product, false otherwise
+    function likedProduct(uint256 _index) public view returns (bool) {
+        return liked[_index][msg.sender];
     }
 }
