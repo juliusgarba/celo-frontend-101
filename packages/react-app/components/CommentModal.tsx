@@ -35,7 +35,10 @@ const CommentModal = ({id, name}:any) => {
   // Define function that handles adding a comment to a product
   const addComment = async (e: any) => {
     e.preventDefault();
-    setComment("")
+    if (comment.replace(/^[ ]+|[ ]+$/g, '').length < 2) {
+      toast.warn("Please enter a valid comment string");
+      return;
+    }
     try {
       // Display a notification while the comment is added to the product
       await toast.promise(async () => {
@@ -60,6 +63,7 @@ const CommentModal = ({id, name}:any) => {
       // Clear the loading state after a comment is added to a product
     } finally {
       setLoading("");
+      setComment("");
     }
   };
 
@@ -120,7 +124,7 @@ const CommentModal = ({id, name}:any) => {
                 </div>
                   {/* Input field for making comment */}
                   <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <textarea onChange={(e) => setComment(e.target.value)} rows={4} required className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Leave a comment..."></textarea>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} required className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Leave a comment..."></textarea>
                   </div>
                   {/* Button to close the modal */}
                   <div className="bg-gray-200 px-4 py-3 text-right">
